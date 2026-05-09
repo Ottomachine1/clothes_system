@@ -1,0 +1,23 @@
+services:
+  clothes-system:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: clothes-system:latest
+    container_name: clothes-system
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_URLS: "http://+:8080"
+      ASPNETCORE_ENVIRONMENT: "Production"
+      OpenBrowserOnStart: "false"
+      DataRoot: "/app/data"
+      ConnectionStrings__DefaultConnection: "Data Source=/app/data/clothes-system.db"
+      SeedDefaultAdmin: "true"
+      ResetDefaultAdminPassword: "false"
+      SeedDemoClothing: "true"
+      SeedDemoUsers: "false"
+      ResetDemoPasswords: "false"
+    volumes:
+      - ./docker-data:/app/data

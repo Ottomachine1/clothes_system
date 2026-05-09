@@ -1,0 +1,132 @@
+@model HomeIndexViewModel
+
+@{
+    ViewData["Title"] = "首页";
+    var summary = Model.Summary;
+}
+
+@if (!Model.IsAuthenticated)
+{
+    <section class="landing-stage">
+        <div class="landing-grid">
+            <div class="landing-copy">
+                <span class="eyebrow">Windows First · 分层架构 · 可持续扩展</span>
+                <h1 class="landing-title">服装款式工作台</h1>
+                <p class="landing-lead">
+                    管理款号、图片、面料、修改意见、审批记录和 Excel 设计单接口，让款式资料从建档到确认都有清晰记录。
+                </p>
+                <div class="landing-actions">
+                    <a class="btn btn-light btn-lg" asp-area="Identity" asp-page="/Account/Login">立即登录</a>
+                    <a class="btn btn-outline-light btn-lg" asp-area="Identity" asp-page="/Account/Register">注册用户</a>
+                </div>
+                <div class="landing-pill-row">
+                    <span class="landing-pill">多图片附件</span>
+                    <span class="landing-pill">面料表格</span>
+                    <span class="landing-pill">审批流记录</span>
+                    <span class="landing-pill">Excel 模板接口</span>
+                </div>
+            </div>
+
+            <aside class="launch-panel">
+                <div class="launch-card">
+                    <div class="launch-kicker">系统入口</div>
+                    <h2 class="launch-title">轻量化款式协同系统</h2>
+                    <p class="launch-copy">基于 ASP.NET Core 8、SQLite 和 Identity，支持 Web 运行和 Windows 桌面封装。</p>
+                </div>
+
+                @if (Model.ShowDemoCredentials)
+                {
+                    <div class="credential-stack">
+                        <article class="credential-tile">
+                            <div class="credential-label">管理员</div>
+                            <strong>admin@clothes.local</strong>
+                            <span>密码：<code>Admin123!</code></span>
+                        </article>
+                        <article class="credential-tile">
+                            <div class="credential-label">设计师</div>
+                            <strong>designer@clothes.local</strong>
+                            <span>密码：<code>Designer123!</code></span>
+                        </article>
+                    </div>
+                }
+            </aside>
+        </div>
+
+        <div class="landing-ribbon">
+            <article class="ribbon-card">
+                <span class="ribbon-index">01</span>
+                <h3>款式档案</h3>
+                <p>围绕款号、年份、季节、进度、负责人和图片建立统一资料。</p>
+            </article>
+            <article class="ribbon-card">
+                <span class="ribbon-index">02</span>
+                <h3>面料明细</h3>
+                <p>按材料、规格和备注维护面料信息，减少散落在备注里的关键资料。</p>
+            </article>
+            <article class="ribbon-card">
+                <span class="ribbon-index">03</span>
+                <h3>审批记录</h3>
+                <p>提交、通过、驳回和打回修改都有时间线，方便追溯。</p>
+            </article>
+            <article class="ribbon-card">
+                <span class="ribbon-index">04</span>
+                <h3>模板衔接</h3>
+                <p>预留固定 Excel 导入导出接口，后续可替换成正式设计单模型。</p>
+            </article>
+        </div>
+    </section>
+}
+else
+{
+    <section class="dashboard-stage">
+        <div class="dashboard-stage-grid">
+            <div class="dashboard-copy">
+                <span class="eyebrow">Clothes Workflow Console</span>
+                <h1 class="landing-title">今天的款式工作台</h1>
+                <p class="landing-lead">
+                    @(Model.IsAdmin
+                        ? "当前为管理员视角，可以查看全部款式、负责人和审批状态。"
+                        : "当前为个人视角，只显示分配给你的款式资料。")
+                </p>
+                <div class="landing-actions">
+                    <a class="btn btn-light btn-lg" asp-controller="ClothingItems" asp-action="Index">进入款式管理</a>
+                    <a class="btn btn-outline-light btn-lg" asp-controller="ClothingItems" asp-action="Create">新建款式</a>
+                </div>
+            </div>
+
+            <aside class="dashboard-spotlight">
+                <div class="spotlight-kicker">当前角色</div>
+                <h2>@(Model.IsAdmin ? "管理员视角" : "个人工作视角")</h2>
+                <p>@(Model.IsAdmin ? "适合全局审阅与流程推进。" : "适合维护自己负责的款式。")</p>
+                <div class="spotlight-divider"></div>
+                <div class="spotlight-meta">
+                    <span>建议优先检查</span>
+                    <strong>@(Model.IsAdmin ? "审批中的款式" : "样衣、改版与确认节点")</strong>
+                </div>
+            </aside>
+        </div>
+
+        <div class="summary-ribbon">
+            <article class="summary-card">
+                <span class="summary-label">可见款式</span>
+                <strong class="summary-value">@summary?.VisibleItems</strong>
+                <p>当前账号可以访问的款式总数。</p>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">我的款式</span>
+                <strong class="summary-value">@summary?.MyItems</strong>
+                <p>负责人为当前账号的款式数量。</p>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">进行中</span>
+                <strong class="summary-value">@summary?.ActiveItems</strong>
+                <p>尚未进入 PASS 的款式数量。</p>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">PASS</span>
+                <strong class="summary-value">@summary?.CompletedItems</strong>
+                <p>已经完成确认的款式数量。</p>
+            </article>
+        </div>
+    </section>
+}

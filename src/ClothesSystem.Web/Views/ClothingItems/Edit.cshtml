@@ -1,0 +1,24 @@
+@model ClothingItemFormViewModel
+
+@{
+    ViewData["Title"] = "编辑款式";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">编辑档案</span>
+        <div class="style-hero-number">@Model.StyleNumber</div>
+        <h1 class="page-title">@Model.Title</h1>
+        <p class="page-subtitle">款号会固定显示在页面左上方，便于快速确认当前编辑对象。</p>
+    </div>
+</section>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" data-clothing-form>
+    <partial name="_Form" model="Model" />
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/clothing-form.js" asp-append-version="true"></script>
+    <script src="~/js/image-dropzone.js" asp-append-version="true"></script>
+}

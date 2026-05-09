@@ -1,0 +1,70 @@
+@model AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "管理员视图";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">管理员总览</span>
+        <h1 class="page-title">全局运营视图</h1>
+        <p class="page-subtitle">查看全部用户、款式分配情况和当前通过进度。</p>
+    </div>
+</section>
+
+<section class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="metric-card">
+            <span class="metric-label">系统用户数</span>
+            <strong class="metric-value">@Model.TotalUsers</strong>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <span class="metric-label">款式总数</span>
+            <strong class="metric-value">@Model.TotalItems</strong>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <span class="metric-label">进行中款式</span>
+            <strong class="metric-value">@Model.ActiveItems</strong>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <span class="metric-label">PASS 款式</span>
+            <strong class="metric-value">@Model.CompletedItems</strong>
+        </div>
+    </div>
+</section>
+
+<section class="panel-card">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+        <h2 class="section-title mb-0">负责人分配情况</h2>
+        <a class="btn btn-outline-secondary" asp-controller="ClothingItems" asp-action="Index">查看全部款式</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle table-modern">
+            <thead>
+                <tr>
+                    <th>负责人</th>
+                    <th>账号</th>
+                    <th>款式数</th>
+                    <th>进行中</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var owner in Model.Owners)
+                {
+                    <tr>
+                        <td>@owner.DisplayName</td>
+                        <td>@owner.Email</td>
+                        <td>@owner.ItemCount</td>
+                        <td>@owner.ActiveItemCount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

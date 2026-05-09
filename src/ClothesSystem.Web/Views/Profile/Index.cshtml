@@ -1,0 +1,48 @@
+@model ClothesSystem.Web.Controllers.ProfileViewModel
+
+@{
+    ViewData["Title"] = "个人资料";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">账户设置</span>
+        <h1 class="page-title">个人资料</h1>
+        <p class="page-subtitle">修改你的显示名称，导出的设计单将使用此名称。</p>
+    </div>
+</section>
+
+<section class="row">
+    <div class="col-md-6">
+        <div class="panel-card">
+            @if (TempData["StatusMessage"] != null)
+            {
+                <div class="alert alert-success mb-3">@TempData["StatusMessage"]</div>
+            }
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label for="UserName" class="form-label">账号</label>
+                    <input type="text" class="form-control" id="UserName" value="@Model.UserName" disabled />
+                    <div class="form-text">账号无法修改</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="DisplayName" class="form-label">显示名称</label>
+                    <input type="text" class="form-control" id="DisplayName" name="DisplayName" value="@Model.DisplayName" required />
+                    <div class="form-text">导出的设计单、款式信息中将使用此名称</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="Email" class="form-label">邮箱</label>
+                    <input type="email" class="form-control" id="Email" value="@Model.Email" disabled />
+                </div>
+
+                <button type="submit" class="btn btn-primary">保存修改</button>
+                <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">返回首页</a>
+            </form>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,191 @@
+@model ClothingItemFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+<input asp-for="Id" type="hidden" />
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="panel-card h-100">
+            <h2 class="section-title">基础信息</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="StyleNumber" class="form-label">款号</label>
+                    <input asp-for="StyleNumber" class="form-control style-number-input" />
+                    <div class="form-text">系统会按 `DYYK-年份月份流水号` 自动生成初始款号，你也可以按业务需要手动修改。</div>
+                    <span asp-validation-for="StyleNumber" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Title" class="form-label">款式名称</label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Year" class="form-label">年份</label>
+                    <select asp-for="Year" asp-items="Model.YearOptions" class="form-select"></select>
+                    <span asp-validation-for="Year" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Season" class="form-label">季节 / 时间标签</label>
+                    <select asp-for="Season" asp-items="Model.SeasonOptions" class="form-select">
+                        <option value="">-- 请选择季节 --</option>
+                    </select>
+                    <span asp-validation-for="Season" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Progress" class="form-label">当前进度</label>
+                    <select asp-for="Progress" asp-items="Model.ProgressOptions" class="form-select"></select>
+                    <span asp-validation-for="Progress" class="text-danger"></span>
+                </div>
+                @if (Model.IsAdmin)
+                {
+                    <div class="col-12">
+                        <label asp-for="OwnerId" class="form-label">负责人</label>
+                        <select asp-for="OwnerId" asp-items="Model.OwnerOptions" class="form-select"></select>
+                        <span asp-validation-for="OwnerId" class="text-danger"></span>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-12">
+                        <label class="form-label">负责人</label>
+                        <div class="readonly-box">当前登录用户将自动成为该款式的负责人。</div>
+                    </div>
+                }
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label">补充说明</label>
+                    <textarea asp-for="Description" class="form-control" rows="5" placeholder="记录版型说明、节点备注、注意事项等。"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="panel-card h-100">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <h2 class="section-title mb-0">图片附件</h2>
+                <span class="text-muted">@Model.ExistingAttachments.Count 张已保存</span>
+            </div>
+
+            @if (Model.ExistingAttachments.Count > 0)
+            {
+                <div class="attachment-grid mb-3">
+                    @foreach (var attachment in Model.ExistingAttachments)
+                    {
+                        <label class="existing-attachment-card">
+                            <img src="@attachment.FilePath" alt="@attachment.OriginalFileName" />
+                            <span class="existing-attachment-name">@attachment.OriginalFileName</span>
+                            <span class="existing-attachment-meta">@attachment.UploadedByDisplayName · @attachment.UploadedAtUtc.ToLocalTime().ToString("yyyy-MM-dd")</span>
+                            <span class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="AttachmentIdsToDelete" value="@attachment.Id" />
+                                <span class="form-check-label">保存时删除这张图片</span>
+                            </span>
+                        </label>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="image-placeholder mb-3">当前还没有图片附件</div>
+            }
+
+            <label class="form-label">@(Model.IsCreateMode ? "上传款式图片" : "新增图片附件")</label>
+
+            <div class="image-drop-zone" id="imageDropZone">
+                <div class="drop-zone-content">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <p>将图片拖拽到此处，或点击选择文件</p>
+                    <span>支持 jpg、png、webp，单张不超过 5MB</span>
+                </div>
+            </div>
+
+            <input asp-for="NewImageFiles" type="file" id="imageInput" class="form-control d-none" accept=".jpg,.jpeg,.png,.webp" multiple />
+
+            <div class="image-preview-grid" id="imagePreviewGrid"></div>
+
+            <template id="imagePreviewTemplate">
+                <div class="preview-item">
+                    <img class="preview-image" alt="预览" />
+                    <button type="button" class="btn-remove-image">&times;</button>
+                    <span class="preview-filename"></span>
+                </div>
+            </template>
+
+            @if (Model.IsCreateMode)
+            {
+                <div class="form-text">首次创建款式时至少上传一张图片，支持一次选择多张。</div>
+            }
+            else
+            {
+                <div class="form-text">编辑时图片为可选项，你可以不新增图片，仅修改其他资料。</div>
+            }
+            <span asp-validation-for="NewImageFiles" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="panel-card mt-4" data-fabric-editor>
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+        <div>
+            <h2 class="section-title mb-1">面料信息表</h2>
+            <p class="text-muted mb-0">三列信息都改为选填；每次点击“添加一行”都会新增一行三列面料信息。</p>
+        </div>
+        <button type="button" class="btn btn-outline-secondary" data-add-fabric-row>添加一行</button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-modern align-middle fabric-table" data-fabric-table>
+            <thead>
+                <tr>
+                    <th>面料名称</th>
+                    <th>规格 / 成分</th>
+                    <th>备注</th>
+                    <th class="text-end">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var index = 0; index < Model.FabricEntries.Count; index++)
+                {
+                    <tr data-fabric-row>
+                        <td>
+                            <input asp-for="FabricEntries[index].Id" type="hidden" />
+                            <input asp-for="FabricEntries[index].MaterialName" class="form-control" placeholder="例如：塔丝隆" />
+                        </td>
+                        <td>
+                            <input asp-for="FabricEntries[index].Specification" class="form-control" placeholder="例如：135g / 防泼水" />
+                        </td>
+                        <td>
+                            <input asp-for="FabricEntries[index].Remark" class="form-control" placeholder="例如：主面料" />
+                        </td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-remove-fabric-row>删除</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <template data-fabric-row-template>
+        <tr data-fabric-row>
+            <td>
+                <input type="hidden" name="FabricEntries[__index__].Id" value="" />
+                <input type="text" name="FabricEntries[__index__].MaterialName" class="form-control" placeholder="例如：塔丝隆" />
+            </td>
+            <td>
+                <input type="text" name="FabricEntries[__index__].Specification" class="form-control" placeholder="例如：135g / 防泼水" />
+            </td>
+            <td>
+                <input type="text" name="FabricEntries[__index__].Remark" class="form-control" placeholder="例如：主面料" />
+            </td>
+            <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-danger" data-remove-fabric-row>删除</button>
+            </td>
+        </tr>
+    </template>
+</div>
+
+<div class="d-flex flex-wrap gap-3 mt-4">
+    <button type="submit" class="btn btn-primary btn-lg">保存款式</button>
+    <a class="btn btn-outline-secondary btn-lg" asp-action="Index">返回列表</a>
+</div>

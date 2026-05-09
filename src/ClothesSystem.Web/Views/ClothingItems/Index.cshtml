@@ -1,0 +1,175 @@
+@model ClothingItemSearchViewModel
+
+@{
+    ViewData["Title"] = "款式管理";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">款式数据库</span>
+        <h1 class="page-title">款式管理</h1>
+        <p class="page-subtitle">支持年份、关键词、款号、进度和负责人筛选，快速定位目标款式。</p>
+    </div>
+    <a class="btn btn-primary btn-lg" asp-action="Create">新建款式</a>
+    <a class="btn btn-outline-primary btn-lg" asp-action="ImportDesignSheet">导入设计单</a>
+</section>
+
+<section class="panel-card mb-4">
+    <form method="get" class="row g-3">
+        <div class="col-md-3">
+            <label class="form-label">款号</label>
+            <input class="form-control" name="StyleNumber" value="@Model.Search.StyleNumber" placeholder="例如 JK-2026-001" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">年份</label>
+            <input class="form-control" type="number" name="Year" value="@Model.Search.Year" placeholder="2026" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">季节 / 时间</label>
+            <input class="form-control" name="Season" value="@Model.Search.Season" placeholder="例如 春季" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">当前进度</label>
+            <select class="form-select" name="Progress">
+                <option value="">全部</option>
+                @foreach (var option in Model.ProgressOptions)
+                {
+                    <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+                }
+            </select>
+        </div>
+        @if (Model.IsAdmin)
+        {
+            <div class="col-md-3">
+                <label class="form-label">负责人</label>
+                <select class="form-select" name="OwnerId">
+                    <option value="">全部负责人</option>
+                    @foreach (var option in Model.OwnerOptions)
+                    {
+                        <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+                    }
+                </select>
+            </div>
+        }
+        <div class="col-md-@(Model.IsAdmin ? "9" : "10")">
+            <label class="form-label">关键词</label>
+            <input class="form-control" name="Keyword" value="@Model.Search.Keyword" placeholder="支持标题、面料、描述、修改意见等关键字" />
+        </div>
+        <div class="col-md-@(Model.IsAdmin ? "3" : "2") d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary flex-fill">搜索</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">重置</a>
+        </div>
+    </form>
+</section>
+
+@if (Model.Result.Items.Count == 0)
+{
+    <section class="empty-state">
+        <h2>没有符合条件的款式</h2>
+        <p>你可以调整搜索条件，或者直接新建新的款式档案。</p>
+        <a class="btn btn-primary" asp-action="Create">新建款式</a>
+    </section>
+}
+else
+{
+    <section class="row g-4">
+        @foreach (var item in Model.Result.Items)
+        {
+            <div class="col-xl-4 col-lg-6">
+                <article class="item-card h-100">
+                    <div class="item-card-image">
+                        @if (!string.IsNullOrWhiteSpace(item.ImagePath))
+                        {
+                            <img src="@item.ImagePath" alt="@item.Title" />
+                        }
+                        else
+                        {
+                            <div class="image-placeholder">暂无图片</div>
+                        }
+                    </div>
+                    <div class="item-card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <span class="item-style-number">@item.StyleNumber</span>
+                                <h2 class="item-title">@item.Title</h2>
+                            </div>
+                            <div class="status-stack">
+                                <span class="progress-chip">@item.ProgressDisplayName</span>
+                                <span class="approval-chip">@item.ApprovalStatusDisplayName</span>
+                            </div>
+                        </div>
+                        <dl class="item-meta">
+                            <div>
+                                <dt>年份</dt>
+                                <dd>@item.Year</dd>
+                            </div>
+                            <div>
+                                <dt>季节</dt>
+                                <dd>@item.Season</dd>
+                            </div>
+                            <div>
+                                <dt>负责人</dt>
+                                <dd>@item.OwnerDisplayName</dd>
+                            </div>
+                        </dl>
+                        <p class="item-description">@item.FabricInformation</p>
+                    </div>
+                    <div class="item-card-footer">
+                        <small class="text-muted">更新时间：@item.UpdatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</small>
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@item.Id">详情</a>
+                            <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@item.Id">编辑</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        }
+    </section>
+
+    @if (Model.Result.TotalPages > 1)
+    {
+        <nav class="mt-4 d-flex justify-content-center" aria-label="分页导航">
+            <ul class="pagination">
+                <li class="page-item @(Model.Result.HasPreviousPage ? "" : "disabled")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-StyleNumber="@Model.Search.StyleNumber"
+                       asp-route-Year="@Model.Search.Year"
+                       asp-route-Season="@Model.Search.Season"
+                       asp-route-Progress="@Model.Search.Progress"
+                       asp-route-OwnerId="@Model.Search.OwnerId"
+                       asp-route-Keyword="@Model.Search.Keyword"
+                       asp-route-Page="@(Model.Result.Page - 1)">上一页</a>
+                </li>
+                @for (var i = 1; i <= Model.Result.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Result.Page ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-StyleNumber="@Model.Search.StyleNumber"
+                           asp-route-Year="@Model.Search.Year"
+                           asp-route-Season="@Model.Search.Season"
+                           asp-route-Progress="@Model.Search.Progress"
+                           asp-route-OwnerId="@Model.Search.OwnerId"
+                           asp-route-Keyword="@Model.Search.Keyword"
+                           asp-route-Page="@i">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.Result.HasNextPage ? "" : "disabled")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-StyleNumber="@Model.Search.StyleNumber"
+                       asp-route-Year="@Model.Search.Year"
+                       asp-route-Season="@Model.Search.Season"
+                       asp-route-Progress="@Model.Search.Progress"
+                       asp-route-OwnerId="@Model.Search.OwnerId"
+                       asp-route-Keyword="@Model.Search.Keyword"
+                       asp-route-Page="@(Model.Result.Page + 1)">下一页</a>
+                </li>
+            </ul>
+        </nav>
+        <p class="text-center text-muted mt-2">
+            共 @Model.Result.TotalCount 条记录，第 @Model.Result.Page / @Model.Result.TotalPages 页
+        </p>
+    }
+}

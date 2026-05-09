@@ -1,0 +1,246 @@
+<Page x:Class="ClothesSystem.Desktop.Views.ClothingDetailsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:vm="clr-namespace:ClothesSystem.Desktop.ViewModels"
+      Title="款式详情 - 服装管理系统">
+
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="{Binding Item.Title}"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="{Binding Item.StyleNumber}"
+                           FontSize="16"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="编辑"
+                        Style="{StaticResource SecondaryButton}"
+                        Command="{Binding EditCommand}"
+                        Margin="0,0,10,0"/>
+                <Button Content="导出Excel"
+                        Style="{StaticResource SecondaryButton}"
+                        Command="{Binding ExportExcelCommand}"
+                        Margin="0,0,10,0"/>
+                <Button Content="返回"
+                        Style="{StaticResource SecondaryButton}"
+                        Command="{Binding BackCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="350"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Main Info -->
+                <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                    <!-- Basic Info Card -->
+                    <Border Background="White" CornerRadius="8" Padding="25" Margin="0,0,0,20">
+                        <StackPanel>
+                            <TextBlock Text="基本信息" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,20"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="款号:" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Item.StyleNumber}" FontWeight="SemiBold"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="季度:" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,10,0,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Item.SeasonDisplayName}" Margin="0,10,0,0"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="进度:" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,10,0,0"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Item.ProgressDisplayName}" Margin="0,10,0,0"/>
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="审批状态:" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,10,0,0"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Item.ApprovalStatusDisplayName}" Margin="0,10,0,0"/>
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="负责人:" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,10,0,0"/>
+                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Item.OwnerDisplayName}" Margin="0,10,0,0"/>
+
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="面料信息:" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,10,0,0"/>
+                                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Item.FabricInformation}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                            </Grid>
+
+                            <TextBlock Text="款式说明" FontSize="14" FontWeight="SemiBold" Margin="0,20,0,10"/>
+                            <TextBlock Text="{Binding Item.Description}" TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Fabric Entries Card -->
+                    <Border Background="White" CornerRadius="8" Padding="25" Margin="0,0,0,20"
+                            Visibility="{Binding Fabrics.Count, Converter={StaticResource CountToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="面料信息" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+                            <ItemsControl ItemsSource="{Binding Fabrics}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#E1E1E1" BorderThickness="0,0,0,1" Padding="0,10">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding MaterialName}" FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding Specification}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Modification Notes Card -->
+                    <Border Background="White" CornerRadius="8" Padding="25" Margin="0,0,0,20">
+                        <StackPanel>
+                            <TextBlock Text="修改意见" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+
+                            <ItemsControl ItemsSource="{Binding Notes}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#E1E1E1" BorderThickness="0,0,0,1" Padding="0,10">
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding CreatedByDisplayName}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding CreatedAtUtc, StringFormat='yyyy-MM-dd HH:mm'}"
+                                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                                               FontSize="12"
+                                                               Margin="10,0,0,0"/>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Margin="0,5,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                                <TextBox Text="{Binding NoteContent, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="400"
+                                         Margin="0,0,10,0"/>
+                                <Button Content="添加意见" Style="{StaticResource PrimaryButton}" Command="{Binding AddNoteCommand}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Approval Records Card -->
+                    <Border Background="White" CornerRadius="8" Padding="25">
+                        <StackPanel>
+                            <TextBlock Text="审批记录" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+
+                            <ItemsControl ItemsSource="{Binding ApprovalRecords}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#E1E1E1" BorderThickness="0,0,0,1" Padding="0,10">
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding ActionDisplayName}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding ReviewerDisplayName}"
+                                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                                               Margin="10,0,0,0"/>
+                                                    <TextBlock Text="{Binding CreatedAtUtc, StringFormat='yyyy-MM-dd HH:mm'}"
+                                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                                               FontSize="12"
+                                                               Margin="10,0,0,0"/>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Comment}" TextWrapping="Wrap" Margin="0,5,0,0"
+                                                           Visibility="{Binding Comment, Converter={StaticResource StringToVisibility}}"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Right Sidebar -->
+                <StackPanel Grid.Column="1">
+                    <!-- Image Gallery Card -->
+                    <Border Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,20">
+                        <StackPanel>
+                            <TextBlock Text="款式图片" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+                            <ItemsControl ItemsSource="{Binding Images}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding BinaryContent, Converter={StaticResource ByteArrayToImage}}"
+                                               MaxHeight="200"
+                                               Margin="0,0,0,10"
+                                               Stretch="Uniform"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Actions Card -->
+                    <Border Background="White" CornerRadius="8" Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="操作" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+
+                            <Button Content="提交审批"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding SubmitForApprovalCommand}"
+                                    Visibility="{Binding CanSubmitApproval, Converter={StaticResource BoolToVis}}"
+                                    Margin="0,0,0,10"
+                                    HorizontalAlignment="Stretch"/>
+
+                            <StackPanel Visibility="{Binding CanReviewApproval, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="审批操作:" Margin="0,0,0,5"/>
+                                <ComboBox SelectedIndex="{Binding SelectedApprovalAction}" Margin="0,0,0,10">
+                                    <ComboBoxItem Content="通过"/>
+                                    <ComboBoxItem Content="驳回"/>
+                                    <ComboBoxItem Content="要求修改"/>
+                                </ComboBox>
+                                <TextBox Text="{Binding ReviewComment, UpdateSourceTrigger=PropertyChanged}"
+                                         AcceptsReturn="True"
+                                         Height="60"
+                                         TextWrapping="Wrap"
+                                         Margin="0,0,0,10"/>
+                                <Button Content="提交审批结果"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Command="{Binding ReviewApprovalCommand}"
+                                        HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Loading -->
+        <StackPanel Grid.Row="0" Grid.RowSpan="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+            <ProgressBar IsIndeterminate="True" Width="200" Height="6"/>
+            <TextBlock Text="加载中..." Margin="0,15,0,0"/>
+        </StackPanel>
+    </Grid>
+</Page>

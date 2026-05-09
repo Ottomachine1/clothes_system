@@ -1,0 +1,239 @@
+@using ClothesSystem.Domain.Enums
+@model ClothingItemDetailsViewModel
+
+@{
+    ViewData["Title"] = "款式详情";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">款式详情</span>
+        <div class="style-hero-number">@Model.Item.StyleNumber</div>
+        <h1 class="page-title">@Model.Item.Title</h1>
+        <p class="page-subtitle">查看当前款式、面料、审批记录和修改意见。</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap no-print">
+        <a class="btn btn-outline-primary" asp-action="PrintDesignSheet" asp-route-id="@Model.Item.Id" target="_blank">打印设计单</a>
+        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Item.Id">编辑</a>
+        <a class="btn btn-outline-secondary" asp-action="Index">返回列表</a>
+    </div>
+</section>
+
+<section class="row g-4">
+    <div class="col-xl-5">
+        <div class="panel-card h-100">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <h2 class="section-title mb-0">图片附件</h2>
+                <span class="text-muted">@Model.Item.ImageAttachments.Count 张</span>
+            </div>
+
+            @if (Model.Item.ImageAttachments.Count > 0)
+            {
+                <div class="detail-gallery mb-4">
+                    @foreach (var attachment in Model.Item.ImageAttachments)
+                    {
+                        <figure class="detail-gallery-item">
+                            <img src="@attachment.FilePath" alt="@attachment.OriginalFileName" />
+                            <figcaption>@attachment.OriginalFileName</figcaption>
+                        </figure>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="image-placeholder detail-placeholder mb-4">当前没有图片附件</div>
+            }
+
+            <div class="detail-grid">
+                <div>
+                    <span>负责人</span>
+                    <strong>@Model.Item.OwnerDisplayName</strong>
+                </div>
+                <div>
+                    <span>年份</span>
+                    <strong>@Model.Item.Year</strong>
+                </div>
+                <div>
+                    <span>季节 / 时间</span>
+                    <strong>@Model.Item.Season</strong>
+                </div>
+                <div>
+                    <span>当前进度</span>
+                    <strong>@Model.Item.ProgressDisplayName</strong>
+                </div>
+                <div>
+                    <span>审批状态</span>
+                    <strong>@Model.Item.ApprovalStatusDisplayName</strong>
+                </div>
+                <div>
+                    <span>最近更新</span>
+                    <strong>@Model.Item.UpdatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-7">
+        <div class="panel-card mb-4">
+            <h2 class="section-title">面料信息表</h2>
+            @if (Model.Item.FabricEntries.Count == 0)
+            {
+                <div class="empty-mini">当前还没有面料行数据。</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-modern align-middle">
+                        <thead>
+                            <tr>
+                                <th>面料名称</th>
+                                <th>规格 / 成分</th>
+                                <th>备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in Model.Item.FabricEntries)
+                            {
+                                <tr>
+                                    <td>@entry.MaterialName</td>
+                                    <td>@entry.Specification</td>
+                                    <td>@entry.Remark</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div class="panel-card mb-4">
+            <h2 class="section-title">补充说明</h2>
+            <p class="detail-text">@(string.IsNullOrWhiteSpace(Model.Item.Description) ? "暂无补充说明" : Model.Item.Description)</p>
+        </div>
+
+        <div class="panel-card mb-4">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <h2 class="section-title mb-0">Excel 模板接口</h2>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a class="btn btn-outline-secondary" asp-action="ExportExcelTemplate" asp-route-id="@Model.Item.Id">导出占位模板</a>
+                    <a class="btn btn-primary" asp-action="ExportDesignSheet" asp-route-id="@Model.Item.Id">导出设计单</a>
+                </div>
+            </div>
+            <p class="detail-text mb-3">打印设计单会直接调用打印机，以设计单格式输出。请在打印设置中选择纸张尺寸为 A4。</p>
+            <form asp-action="ImportExcelTemplate" method="post" enctype="multipart/form-data" class="row g-3">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Item.Id" />
+                <div class="col-md-8">
+                    <input class="form-control" type="file" name="templateFile" accept=".xlsx,.xls,.csv" />
+                </div>
+                <div class="col-md-4 d-grid">
+                    <button type="submit" class="btn btn-primary">导入 Excel 占位文件</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel-card mb-4">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <h2 class="section-title mb-0">审批流</h2>
+                <span class="approval-chip large">@Model.Item.ApprovalStatusDisplayName</span>
+            </div>
+
+            @if (Model.CanSubmitApproval)
+            {
+                <form asp-action="SubmitApproval" method="post" class="mb-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Item.Id" />
+                    <label for="approvalComment" class="form-label">提交审批备注</label>
+                    <textarea id="approvalComment" name="comment" class="form-control" rows="3" placeholder="例如：样衣已完成，请审批。"></textarea>
+                    <button type="submit" class="btn btn-primary mt-3">提交审批</button>
+                </form>
+            }
+
+            @if (Model.CanReviewApproval)
+            {
+                <form asp-action="ReviewApproval" method="post" class="approval-review-box mb-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Item.Id" />
+                    <label for="reviewComment" class="form-label">审批意见</label>
+                    <textarea id="reviewComment" name="comment" class="form-control" rows="3" placeholder="请输入审批结论或修改意见"></textarea>
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <button type="submit" name="decision" value="@ApprovalAction.Approved" class="btn btn-primary">审批通过</button>
+                        <button type="submit" name="decision" value="@ApprovalAction.ReturnedForChanges" class="btn btn-outline-secondary">打回修改</button>
+                        <button type="submit" name="decision" value="@ApprovalAction.Rejected" class="btn btn-outline-danger">驳回</button>
+                    </div>
+                </form>
+            }
+
+            @if (Model.Item.ApprovalRecords.Count == 0)
+            {
+                <div class="empty-mini">当前还没有审批记录。</div>
+            }
+            else
+            {
+                <div class="timeline">
+                    @foreach (var record in Model.Item.ApprovalRecords)
+                    {
+                        <article class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between flex-wrap gap-2">
+                                    <strong>@record.ActionDisplayName</strong>
+                                    <span class="text-muted">@record.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
+                                </div>
+                                <div class="text-muted mt-2">@record.CreatedByDisplayName</div>
+                                @if (!string.IsNullOrWhiteSpace(record.Comment))
+                                {
+                                    <p class="mb-0 mt-2">@record.Comment</p>
+                                }
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="panel-card">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <h2 class="section-title mb-0">修改意见</h2>
+                <span class="text-muted">@Model.Item.ModificationNotes.Count 条</span>
+            </div>
+
+            <form asp-action="AddNote" method="post" class="mb-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Item.Id" />
+                <label for="content" class="form-label">新增修改意见</label>
+                <textarea id="content" name="content" class="form-control" rows="4" placeholder="记录本次打样、版型、面料或工艺修改意见"></textarea>
+                <button type="submit" class="btn btn-primary mt-3">保存修改意见</button>
+            </form>
+
+            @if (Model.Item.ModificationNotes.Count == 0)
+            {
+                <div class="empty-mini">当前还没有修改意见记录。</div>
+            }
+            else
+            {
+                <div class="timeline">
+                    @foreach (var note in Model.Item.ModificationNotes)
+                    {
+                        <article class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between flex-wrap gap-2">
+                                    <strong>@note.CreatedByDisplayName</strong>
+                                    <span class="text-muted">@note.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
+                                </div>
+                                <p class="mb-0 mt-2">@note.Content</p>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </div>
+
+        <form asp-action="Delete" method="post" class="mt-4 no-print" onsubmit="return confirm('确认删除这个款式吗？');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Item.Id" />
+            <button type="submit" class="btn btn-outline-danger">删除该款式</button>
+        </form>
+    </div>
+</section>

@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+.claude/
+.git/
+.vs/
+publish/
+docker-data/
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/logs/
+**/exports/
+**/images/
+*.user
+*.suo

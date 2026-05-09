@@ -1,0 +1,61 @@
+@{
+    ViewData["Title"] = "导入设计单";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">导入</span>
+        <h1 class="page-title">从设计单导入</h1>
+        <p class="page-subtitle">上传填写好的设计单 Excel 文件，自动创建新款式。</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-action="Index">返回列表</a>
+    </div>
+</section>
+
+<section class="row">
+    <div class="col-md-6">
+        <div class="panel-card">
+            @if (TempData["StatusMessage"] != null)
+            {
+                <div class="alert alert-info mb-3">@TempData["StatusMessage"]</div>
+            }
+
+            <form method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-4">
+                    <label for="designSheetFile" class="form-label">选择设计单文件</label>
+                    <input class="form-control" type="file" id="designSheetFile" name="designSheetFile" accept=".xlsx" required />
+                    <div class="form-text">支持 .xlsx 格式，请使用导出的设计单模板填写</div>
+                </div>
+
+                <div class="alert alert-secondary">
+                    <h5 class="alert-heading">导入说明</h5>
+                    <ul class="mb-0">
+                        <li>款号：必填，将作为款式唯一标识</li>
+                        <li>品名：将作为款式名称</li>
+                        <li>季度：解析年份和季节（SS=春夏，AW=秋冬）</li>
+                        <li>面料信息：将从设计单的面料区域提取</li>
+                        <li>如果款号已存在，导入将失败</li>
+                    </ul>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">导入</button>
+                    <a class="btn btn-outline-secondary" asp-action="Index">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="panel-card">
+            <h3 class="section-title">模板下载</h3>
+            <p class="text-muted">如果没有设计单模板，可以先导出一份空白模板：</p>
+            <a class="btn btn-outline-primary" asp-controller="ClothingItems" asp-action="ExportDesignSheet" asp-route-id="@Guid.Empty">
+                导出空白设计单模板
+            </a>
+        </div>
+    </div>
+</section>

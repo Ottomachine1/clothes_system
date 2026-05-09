@@ -1,0 +1,24 @@
+@model ClothingItemFormViewModel
+
+@{
+    ViewData["Title"] = "新建款式";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">新增档案</span>
+        <div class="style-hero-number">@Model.StyleNumber</div>
+        <h1 class="page-title">新建款式</h1>
+        <p class="page-subtitle">系统已预生成本月款号，你可以直接使用，也可以在保存前按实际业务调整。</p>
+    </div>
+</section>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data" data-clothing-form>
+    <partial name="_Form" model="Model" />
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/clothing-form.js" asp-append-version="true"></script>
+    <script src="~/js/image-dropzone.js" asp-append-version="true"></script>
+}

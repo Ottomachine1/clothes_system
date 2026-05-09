@@ -1,0 +1,77 @@
+@using ClothesSystem.Web.Authorization
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - 服装管理系统</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ClothesSystem.Web.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="app-shell">
+    <header class="site-header">
+        <div class="container-xl">
+            <nav class="navbar navbar-expand-lg navbar-dark py-3">
+                <a class="navbar-brand d-flex align-items-center gap-3" asp-controller="Home" asp-action="Index">
+                    <span class="brand-badge">衣</span>
+                    <span>
+                        <strong class="d-block">服装管理系统</strong>
+                        <small class="brand-subtitle">轻量化款式协同平台</small>
+                    </span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="切换导航">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">首页</a>
+                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ClothingItems" asp-action="Index">款式管理</a>
+                            </li>
+                            @if (User.IsInRole(ApplicationRoles.Admin))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Admin" asp-action="Index">管理员视图</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                    <div class="ms-lg-4">
+                        <partial name="_LoginPartial" />
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-body">
+        <div class="container-xl py-4">
+            @if (TempData["StatusMessage"] is string statusMessage)
+            {
+                <div class="alert app-alert mb-4" role="alert">
+                    @statusMessage
+                </div>
+            }
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container-xl d-flex flex-column flex-lg-row justify-content-between gap-2 py-4">
+            <span>2026 服装管理系统</span>
+            <span>支持多图片附件、面料表格、审批流和 Excel 模板接口。</span>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

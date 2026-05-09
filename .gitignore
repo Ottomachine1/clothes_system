@@ -1,0 +1,33 @@
+# Build outputs
+bin/
+obj/
+publish/
+
+# Runtime data
+docker-data/
+*.db
+*.db-shm
+*.db-wal
+logs/
+exports/
+images/
+
+# IDE and user files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Test artifacts
+TestResults/
+coverage/
+*.trx
+
+# Local tool state
+.claude/
